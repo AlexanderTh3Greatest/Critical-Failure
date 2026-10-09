@@ -1,0 +1,238 @@
+Yep. Copy everything below and paste it directly into the same Codex conversation. This includes the full specification plus the instruction to continue from what Codex already built.
+CRITICAL FAILURE — COMPLETE APPROVED V0.1 SPECIFICATION
+Continue implementation from the multiplayer foundation you have already built. Do not restart the project or repeat the planning phase. The following is the complete approved specification and must be treated as the source of truth for all remaining implementation.
+Build a real-time multiplayer browser game called CRITICAL FAILURE.
+The game takes place in a fictional advanced energy facility called CF-01. This is a cooperative 2–4 player game. Players are an operating crew trying to keep the facility running during a six-minute shift while equipment failures, faulty instrumentation, electrical problems, and cascading failures occur.
+The defining mechanic is asymmetric information. Every player operates a different station and MUST NOT be able to see the detailed information available to the other stations. Players have to communicate with one another to correctly diagnose problems.
+Do not model a real nuclear facility or reproduce real reactor procedures. CF-01 is fictional and its systems should be simplified and designed around gameplay.
+Multiplayer requirements
+Build this as a real-time multiplayer web application that works on phones and computers.
+A player opening the game should see:
+CREATE SHIFT
+JOIN SHIFT
+Creating a shift generates a short room code such as CF-4821.
+Joining requires only:
+- Nickname
+- Room code
+Players should not need an account or installation.
+All players in a room must remain synchronized in real time. If one player starts a pump, opens a breaker, changes reactor output, acknowledges a command, or causes a system failure, the resulting facility state must update appropriately for every connected player.
+Build reconnect handling so a temporarily disconnected player can return to the same active room when reasonably possible.
+Lobby
+Support 2–4 players for V0.1.
+The four stations are:
+OPERATIONS
+ELECTRICAL
+MECHANICAL / COOLING
+INSTRUMENTATION & CONTROLS
+With four players, each player receives one station.
+For V0.1, allow the host to assign stations manually or randomize them.
+Each player must select READY before the host can begin the shift.
+When fewer than four players are present, players may operate multiple stations. No core station may be removed and no AI/bot may automatically perform the responsibilities of an unoccupied station. Multiple stations controlled by one player must remain separated into their individual station interfaces rather than being combined into a single diagnostic screen. Preserve asymmetric-information gameplay as much as reasonably possible.
+Shared information
+During gameplay, every player may see ONLY these shared values:
+FACILITY INTEGRITY
+ALERT LEVEL
+SHIFT TIME REMAINING
+Detailed process information belongs to individual stations.
+Facility Integrity begins at 100%.
+Alert levels:
+75–100% — NORMAL
+50–74% — DEGRADED
+25–49% — EMERGENCY
+1–24% — CRITICAL
+0% — FACILITY FAILURE
+The team wins by reaching the end of the six-minute shift without Facility Integrity reaching zero.
+Operations station
+Operations sees the overall process but does not receive detailed diagnostic information.
+Display:
+- Reactor output
+- Overall reactor temperature
+- Primary-loop temperature
+- Primary-loop pressure
+- Overall coolant flow
+- Generation output
+- Containment condition
+Controls include:
+- Increase/decrease reactor output
+- Initiate controlled shutdown
+- Authorize selected major actions
+Electrical station
+Electrical receives a simplified fictional one-line diagram:
+GEN-1 → MAIN BUS → BUS-A / BUS-B
+Also include:
+DG-1 — Emergency generator
+BAT-1 — Control-system battery
+BUS-A primarily supports Cooling Train A.
+BUS-B primarily supports Cooling Train B.
+Electrical sees:
+- Generator output
+- Bus loads
+- Breaker positions
+- Equipment electrical loads
+- Battery condition
+- Emergency-generator condition
+Electrical can:
+- Open/close breakers
+- Transfer selected loads
+- Start DG-1
+- Isolate electrical faults
+Electrical decisions must affect equipment available to other players.
+Mechanical / Cooling station
+Create two cooling trains:
+P-201A → HX-201A → CV-201A
+P-201B → HX-201B → CV-201B
+Mechanical sees:
+- Pump status
+- Flow
+- Pressure
+- Temperature
+- Valve position
+- Simplified vibration indication
+- Heat-exchanger condition
+Mechanical can:
+- Start/stop pumps
+- Operate cooling valves
+- Isolate equipment
+- Select standby equipment where appropriate
+Mechanical equipment must require electrical power from the Electrical station.
+Instrumentation & Controls station
+I&C is responsible for determining whether indications can be trusted.
+Use fictional instrument tags:
+FT — Flow transmitter
+PT — Pressure transmitter
+TT — Temperature transmitter
+VT — Vibration transmitter
+Important measurements should have redundant A/B channels.
+I&C can:
+- Compare redundant channels
+- Select alternate instruments
+- Identify channel disagreement
+- Reset fictional controllers
+- Place selected control loops into manual/automatic
+A failed instrument must be capable of displaying incorrect information to another station while the actual simulated process remains normal.
+Critical design rule
+DO NOT give any station enough information to independently diagnose every problem.
+Players must need one another.
+Example:
+Mechanical sees low flow.
+Electrical sees normal pump current.
+Operations sees stable reactor temperature.
+I&C sees FT-201A disagreeing with FT-201B.
+Those clues together indicate an instrumentation failure rather than an actual loss of cooling.
+Taking the wrong action must be capable of creating a real problem.
+For example, unnecessarily stopping a healthy cooling pump because of a failed flow transmitter can produce an actual cooling-flow problem.
+Three-part communication
+Critical actions should support closed-loop/three-part communication:
+COMMAND → REPEAT-BACK → CONFIRMATION → ACTION
+Example:
+Operations sends:
+ELECTRICAL — OPEN B-204
+Electrical receives it and acknowledges:
+OPEN B-204
+Operations confirms.
+Electrical is then authorized to perform the critical action.
+Do NOT require this process for normal information requests. It should apply only to designated critical actions.
+Include simple communication requests such as:
+- REQUEST ELECTRICAL STATUS
+- REQUEST I&C VERIFICATION
+- REQUEST MECHANICAL STATUS
+- REDUCE REACTOR OUTPUT
+- STANDBY EQUIPMENT READY
+- DO NOT OPERATE
+Players may also communicate verbally outside the application.
+Initial failure system
+Architect the simulation so failures affect the underlying facility state rather than merely displaying popup messages.
+Implement several representative failures for V0.1, including:
+1. P-201A bearing degradation
+2. FT-201A failed-low indication
+3. BUS-B overload
+4. CV-201B stuck valve
+5. TT-201A failed-high indication
+6. HX-201A reduced heat-transfer efficiency
+7. GEN-1 unstable output
+8. Cooling/containment ventilation failure
+9. Fictional controller malfunction
+10. Genuine primary cooling loss
+The architecture should allow multiple failures to coexist and produce cascading consequences.
+A genuine mechanical problem should create consistent clues across several stations. An instrumentation problem should create disagreement between displayed values and actual process behavior.
+Mandatory false-flow test
+Explicitly implement and automatically test the FT-201A failed-low scenario.
+During this instrumentation failure, actual cooling must remain healthy even though FT-201A displays abnormally low flow.
+Other station information should provide clues that the physical system remains healthy, including appropriate redundant instrumentation/process behavior.
+If the crew incorrectly responds by stopping the healthy cooling pump, that player action must then cause a genuine cooling problem in the underlying authoritative facility state.
+This distinction between a false indication and a real player-created failure is a core gameplay requirement.
+Shift pacing
+Each shift lasts 6 minutes.
+Begin with approximately 30 seconds of normal operation so players can familiarize themselves with their stations.
+Introduce failures gradually and increase pressure as the shift progresses.
+Avoid making every failure immediately obvious.
+Scoring
+At the end display:
+- Final Facility Integrity
+- Emergencies resolved
+- Incorrect actions
+- Cascading failures caused
+- Critical actions completed
+- Successful three-part communications
+Give the crew an overall rating from F through S.
+Include a special FLAWLESS SHIFT result for exceptional performance.
+Implement and document deterministic scoring rules for these results so the final rating is based on defined game-state metrics rather than arbitrary client-side behavior.
+UI direction
+The visual style should resemble a fictional modern industrial HMI/control room, while remaining clearly a game.
+Use:
+- Process diagrams
+- Equipment tags
+- Large numerical readouts
+- Gauges/trends where useful
+- Alarm annunciators
+- Breaker/valve/pump states
+- Animated process-flow indicators
+- Clear warning states
+- Large touch-friendly controls
+The game must remain usable on both smartphones and desktop computers.
+New players should understand their basic objective without the creator explaining it to them.
+Include concise tooltips or contextual explanations for unfamiliar equipment.
+Opening presentation:
+CRITICAL FAILURE
+Every system is connected. Every decision has consequences.
+CF-01 // NIGHT SHIFT
+FACILITY STATUS: NORMAL
+SHIFT BEGINS IN 3... 2... 1...
+Creator credit — permanent requirement
+CRITICAL FAILURE must permanently credit Alexander “Alex” Noblin as the game's creator and designer.
+The title/landing experience must tastefully include:
+Created & Designed by Alex Noblin
+Include an About / Credits section identifying:
+Alexander “Alex” Noblin — Creator & Designer
+Credit Alex Noblin with the game concept, systems design, gameplay mechanics, and creative direction.
+Include an appropriate development acknowledgment:
+Developed with AI-assisted tools using ChatGPT.
+These creator credits are a permanent core requirement and must remain in the final public build.
+Hosting and deployment
+Separate backend hosting is approved if it provides the most reliable architecture for server-authoritative multiplayer, synchronization, reconnect handling, and station privacy.
+Regardless of backend architecture, the final player experience must remain simple: players open one public game URL, create or join a room, and do not need accounts or installations.
+Backend credentials, configuration, and secrets must not be exposed to players.
+Testing
+Build and test incrementally.
+Use automated simulation tests and isolated browser/client sessions during development.
+Automated testing must verify:
+- Four independent clients can join one room.
+- Station assignment conflicts are handled correctly.
+- Station-private information remains private.
+- Server-authoritative actions synchronize correctly.
+- Disconnect/reconnect behavior works.
+- The actual facility state and displayed/instrument state remain distinct.
+- The FT-201A false-flow scenario behaves exactly as specified.
+- Incorrect actions can cause genuine cascading failures.
+- Three-part communication operates across independent clients.
+- Shift completion/failure is synchronized.
+- Scoring and crew ratings are deterministic.
+Final acceptance additionally requires testing with four separate physical devices joining the same room. Automated browser/client testing does not replace this final physical-device test.
+Development instructions
+Prioritize reliable multiplayer synchronization and authoritative facility state over graphics.
+Continue from the multiplayer foundation already implemented and tested.
+Do not unnecessarily rewrite working systems that already satisfy this specification.
+Keep the project runnable throughout development and test each major subsystem as it is implemented.
+Do not remove, replace, reinterpret, or materially simplify a core requirement without asking me first.
+V0.1 succeeds when four separate devices can join one room, receive different stations, manipulate the same underlying facility, see only the information appropriate to their station, communicate critical commands using three-part communication, experience interacting failures and cascading consequences, and either successfully complete or fail a synchronized shift.
+This is the complete approved CRITICAL FAILURE V0.1 specification. Continue implementation from the working multiplayer foundation now. Do not restart the project or repeat the planning phase. Preserve the permanent Alex Noblin creator credit. Implement and test the remaining V0.1 requirements incrementally and proceed toward the final public multiplayer build.
