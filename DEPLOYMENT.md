@@ -21,7 +21,7 @@ docker build -t critical-failure .
 docker run --rm -p 3000:3000 critical-failure
 ```
 
-The container runs as the unprivileged `node` user. The image contains the game runtime and public assets, with no development credentials. The Docker engine is not installed in the development environment, so this recipe still needs an actual build/run check.
+The container runs as the unprivileged `node` user. The image contains the game runtime and public assets, with no development credentials. Render successfully built and ran the Docker image; Docker is not installed locally.
 
 ## Proxy requirements
 
@@ -33,5 +33,6 @@ Opaque bearer session credentials, per-station projections, server-side action v
 
 ## Publishing status
 
-The source is published at https://github.com/AlexanderTh3Greatest/Critical-Failure on `main`. GitHub and Render integrations are connected. Render lists the workspace “The Shop”; explicit owner confirmation of that workspace is pending before service creation. A public game URL has not been created. The local folder is not a Git checkout; source publication currently uses the connected GitHub API.
+The source is published at https://github.com/AlexanderTh3Greatest/Critical-Failure on `main`. GitHub and Render integrations are connected. The owner confirmed the Render workspace “The Shop” and its Free plan for initial public testing. The service is `srv-db43pn3bc2fs73agm0fg`, in Virginia, at https://critical-failure.onrender.com, with automatic deployment from `main`. The local folder is not a Git checkout; source publication currently uses the connected GitHub API. Check current deploy status before assuming the URL is live.
 
+Run `node scripts/public-smoke.mjs https://critical-failure.onrender.com` to verify four hosted clients, private station projections, FT-201A false-flow behavior, the full communication sequence, real pump-stop damage, standby recovery and reconnect. This creates a disposable test room and takes approximately 40 seconds. It does not replace the mandatory four-physical-device test.

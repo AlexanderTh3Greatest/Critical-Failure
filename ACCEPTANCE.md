@@ -4,6 +4,12 @@
 
 Latest local run: all 12 tests pass.
 
+## Hosted verification
+
+Render's Docker deployment became live at https://critical-failure.onrender.com on October 8, 2026 (America/New_York), in the confirmed “The Shop” workspace, Virginia region, Free plan. GitHub Actions passed for the initial implementation commit. The hosted `/health` endpoint returned HTTP 200, and the public landing screen displayed the required creator credit.
+
+`node scripts/public-smoke.mjs https://critical-failure.onrender.com` passed with four independent hosted HTTP clients in disposable room CF-BBF666. Verified distinct station payloads, action authorization, FT-201A readings of 4 versus redundant flow of 100 with full integrity and healthy electrical current, blocked premature execution, the complete communication sequence, blocked command replay, actual flow loss after pump stop, temperature/integrity consequences, standby recovery, alternate channel selection and authenticated stream reconnect. A Render error-log check returned no errors. This is public automated verification, not four-physical-device acceptance.
+
 `node --test` covers four independent HTTP clients, room capacity, assignment conflicts, host controls, readiness, private station projections, authorization, streaming reconnect, the full closed-loop communication sequence, replay rejection, electrical/mechanical interactions, separate actual and instrument state, the mandatory FT-201A false-flow scenario, all ten coexisting failure types, player-created cooling cascades, normal first 30 seconds, complete/failed shifts, synchronized four-client results, deterministic rating thresholds and an attainable FLAWLESS SHIFT.
 
 Accelerated tests use a server factory option unavailable through public APIs. Simulated crew recovery tests use direct engine actions to verify that all ten emergencies are recoverable; independent-client tests separately enforce authorization and the communication protocol. They do not establish human difficulty balance.

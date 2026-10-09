@@ -61,7 +61,7 @@ FLAWLESS SHIFT requires completion, actual integrity at least 99%, zero incorrec
 
 ## Deployment and acceptance
 
-See `DEPLOYMENT.md` for the Docker/Render package and `ACCEPTANCE.md` for verification status and the mandatory physical-device procedure. Public deployment and the four-device test are not yet complete. Docker execution has not been verified because Docker is not installed in this workspace.
+The public test build is at https://critical-failure.onrender.com, deployed on Render's Free plan in the owner's confirmed “The Shop” workspace. The Docker image built and started successfully on Render. See `DEPLOYMENT.md` for the deployment configuration and `ACCEPTANCE.md` for verification status and the mandatory physical-device procedure. Final acceptance remains pending the four-physical-device test and phone verification. Free hosting can restart or sleep, and in-memory rooms do not survive server restarts.
 
 ## About / Credits
 
