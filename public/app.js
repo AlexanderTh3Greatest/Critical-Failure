@@ -1,8 +1,9 @@
+import {normalizeRoomCode} from './room-code.js';
 const $=id=>document.getElementById(id);
 const names=['Operations','Electrical','Mechanical/Cooling','Instrumentation & Controls'];
 const requests=['REQUEST ELECTRICAL STATUS','REQUEST I&C VERIFICATION','REQUEST MECHANICAL STATUS','REDUCE REACTOR OUTPUT','STANDBY EQUIPMENT READY','DO NOT OPERATE'];
 let credential=sessionStorage.getItem('cf-session'),activeStation,connecting=false,latest;
-async function api(path,body){const response=await fetch('/api/'+path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',...(credential?{Authorization:'Bearer '+credential}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await response.json();if(!response.ok)throw Error(data.error);return data;}
+async function api(path,body){const response=await fetch('/api/'+path,{method:body?'POST':'GET',cache:'no-store',headers:{'Content-Type':'application/json',...(credential&&!['create','join'].includes(path)?{Authorization:'Bearer '+credential}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await response.json();if(!response.ok)throw Error(data.error);return data;}
 function error(e){$('status').textContent=e.message;}
 function send(path,body){return api(path,body).then(render).catch(error);}
 function node(tag,text,parent,cls){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;if(parent)parent.append(el);return el;}
@@ -41,7 +42,7 @@ function render(state){
  // Preserve focused lobby/command selectors across incoming stream frames.
  const focus=document.activeElement,focusLabel=focus?.closest('label')?.firstChild?.textContent,focusValue=focus?.value;
  const selected=new Map([...document.querySelectorAll('label')].filter(l=>l.querySelector('select')).map(l=>[l.firstChild.textContent,l.querySelector('select').value]));
- $('entry').hidden=true;$('room').hidden=false;$('roomTitle').textContent='CF-01 // '+state.code;$('shared').replaceChildren();readouts($('shared'),state.shared);
+ $('entry').hidden=true;$('room').hidden=false;$('roomTitle').textContent='ROOM CODE: '+state.code;$('shared').replaceChildren();readouts($('shared'),state.shared);
  $('crew').textContent=state.players.map(p=>`${p.name} · ${p.connected?'ONLINE':'OFFLINE'} · ${p.ready?'READY':'NOT READY'}`).join(' | ');
  $('lobby').hidden=state.phase!=='lobby';$('stations').replaceChildren();$('lobbyControls').replaceChildren();
  const host=state.host===state.self.id;
@@ -67,5 +68,5 @@ function render(state){
  if(focusLabel){const restored=[...document.querySelectorAll('label')].find(l=>l.firstChild?.textContent===focusLabel)?.querySelector('select');if(restored&&[...restored.options].some(o=>o.value===focusValue)){restored.value=focusValue;restored.focus();}}
 }
 async function connect(){if(connecting)return;connecting=true;while(credential){const abort=new AbortController();let watchdog=setTimeout(()=>abort.abort(),45000);try{const response=await fetch('/api/events',{headers:{Authorization:'Bearer '+credential},signal:abort.signal});if(response.status===401){credential=null;latest=null;sessionStorage.removeItem('cf-session');$('entry').hidden=false;$('room').hidden=true;$('status').textContent='Session expired after a server restart or room expiry. Create or join a new shift.';break;}if(!response.ok)throw Error('Reconnect session unavailable');$('status').textContent='CREW LINK ONLINE';const reader=response.body.getReader(),decoder=new TextDecoder();let pending='';while(true){const {value,done}=await reader.read();if(done)break;clearTimeout(watchdog);watchdog=setTimeout(()=>abort.abort(),45000);pending+=decoder.decode(value,{stream:true});let end;while((end=pending.indexOf('\n\n'))>=0){const frame=pending.slice(0,end);pending=pending.slice(end+2);if(frame.startsWith('data: '))render(JSON.parse(frame.slice(6)));}}}catch(e){error(e);}finally{clearTimeout(watchdog);abort.abort();}if(!credential)break;$('status').textContent='CREW LINK LOST — reconnecting…';await new Promise(r=>setTimeout(r,1500));}connecting=false;}
-for(const action of ['create','join'])$(action).onclick=async()=>{try{const result=await api(action,{name:$('name').value,code:$('code').value.trim()});credential=result.token;sessionStorage.setItem('cf-session',credential);render(result.state);connect();}catch(e){error(e);}};
+for(const action of ['create','join'])$(action).onclick=async()=>{try{const code=normalizeRoomCode($('code').value);if(action==='join'&&!code)throw Error('Enter the ROOM CODE shown on the host device, for example CF-4821AB.');const result=await api(action,{name:$('name').value,code});credential=result.token;latest=null;sessionStorage.setItem('cf-session',credential);render(result.state);connect();}catch(e){error(e);}};
 if(credential)api('state').then(state=>{render(state);connect();}).catch(e=>{credential=null;sessionStorage.removeItem('cf-session');error(e);});

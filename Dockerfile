@@ -1,6 +1,8 @@
 FROM node:24-alpine
 WORKDIR /app
-COPY --chown=node:node package.json server.js game.js ./
+COPY --chown=node:node package.json ./
+RUN npm install --omit=dev --ignore-scripts
+COPY --chown=node:node server.js game.js room-store.js ./
 COPY --chown=node:node public ./public
 USER node
 ENV NODE_ENV=production PORT=3000

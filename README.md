@@ -6,7 +6,7 @@ CF-01 is a fictional cooperative energy-facility game for 2–4 players. Survive
 
 ## Run and test
 
-Requires Node.js 24 or newer; no dependency installation is needed.
+Requires Node.js 24 or newer. Install dependencies with `npm install` (or `pnpm install`).
 
 ```
 node server.js
@@ -19,13 +19,13 @@ Create a shift, share its room code, and join using nicknames. The host can manu
 
 ## Architecture and privacy
 
-The Node server owns all rooms, timers, simulation state, commands and scores. Same-origin HTTP commands and authenticated Server-Sent Events provide bidirectional real-time interaction without external dependencies. Clients receive projections containing only their assigned stations; detailed facility state and the internal fault list never leave the server. Player identity and station assignments are server-side. Critical actions cannot bypass the closed-loop command endpoint.
+The Node server owns all rooms, timers, simulation state, commands and scores. Same-origin HTTP commands and authenticated Server-Sent Events provide bidirectional real-time interaction with a shared Redis-compatible room store in production. Clients receive projections containing only their assigned stations; detailed facility state and the internal fault list never leave the server. Player identity and station assignments are server-side. Critical actions cannot bypass the closed-loop command endpoint.
 
 Physical state is computed separately from instrument channels. FT-201A and FT-201B measure the same Train A flow, providing redundant measurements rather than measuring different trains. Mechanical and Operations see the selected channel. I&C sees both channels. Selecting a good channel mitigates the scored emergency without repairing the bad transmitter.
 
 The first fault, after 30 seconds of normal operation, is FT-201A failed-low. The physical pump and cooling remain healthy. Incorrectly stopping P-201A creates real cooling loss, subsequent heating, integrity damage and a scored cascade. Later faults occur at 65, 100, 135, 170, 205, 240, 275, 310 and 335 seconds. Several can coexist.
 
-Session credentials live in the individual tab's session storage and travel in authorization headers. Reload and temporary connection loss preserve identity, station assignments and pending communications. Rooms currently live in memory: a server restart loses them. Offline crew seats are retained for reconnect; entirely disconnected rooms expire after two hours. Run one server instance; replicas require shared state before use. A running shift continues while players are disconnected.
+Session credentials live in the individual tab's session storage and travel in authorization headers. Reload and temporary connection loss preserve identity, station assignments and pending communications. Production rooms and session identities are stored in shared server-side Key Value state, surviving application restarts. Local development without REDIS_URL uses memory. Offline crew seats are retained for reconnect; entirely disconnected rooms expire after two hours of inactivity. Shared transactions serialize actions across instances. A running shift continues while players are disconnected.
 
 ## Fictional controls and recovery
 
@@ -61,7 +61,7 @@ FLAWLESS SHIFT requires completion, actual integrity at least 99%, zero incorrec
 
 ## Deployment and acceptance
 
-The public test build is at https://critical-failure.onrender.com, deployed on Render's Free plan in the owner's confirmed “The Shop” workspace. The Docker image built and started successfully on Render. See `DEPLOYMENT.md` for the deployment configuration and `ACCEPTANCE.md` for verification status and the mandatory physical-device procedure. Final acceptance remains pending the four-physical-device test and phone verification. Free hosting can restart or sleep, and in-memory rooms do not survive server restarts.
+The public test build is at https://critical-failure.onrender.com, deployed on Render's Free plan in the owner's confirmed “The Shop” workspace. The Docker image built and started successfully on Render. See `DEPLOYMENT.md` for the deployment configuration and `ACCEPTANCE.md` for verification status and the mandatory physical-device procedure. Final acceptance remains pending the four-physical-device test and phone verification. Free hosting can restart or sleep. Shared rooms survive application restarts; Free Key Value itself has no disk persistence and can lose data if that storage service restarts.
 
 ## About / Credits
 
@@ -70,3 +70,4 @@ Alexander “Alex” Noblin — Creator & Designer. Responsible for the game con
 Developed with AI-assisted tools using ChatGPT.
 
 These credits are a permanent core requirement and appear in the player-facing landing experience and About / Credits section.
+

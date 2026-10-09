@@ -3,7 +3,19 @@ services:
     name: critical-failure
     runtime: docker
     plan: free
+    region: virginia
     healthCheckPath: /health
     envVars:
       - key: PORT
         value: 3000
+      - key: REDIS_URL
+        fromService:
+          name: critical-failure-rooms
+          type: keyvalue
+          property: connectionString
+  - type: keyvalue
+    name: critical-failure-rooms
+    plan: free
+    region: virginia
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
