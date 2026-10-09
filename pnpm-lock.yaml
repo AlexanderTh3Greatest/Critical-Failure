@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       redis:
-        specifier: ^5.12.1
+        specifier: 5.12.1
         version: 5.12.1
 
 packages:
@@ -92,3 +92,4 @@ snapshots:
     transitivePeerDependencies:
       - '@node-rs/xxhash'
       - '@opentelemetry/api'
+

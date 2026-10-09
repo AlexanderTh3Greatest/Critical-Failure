@@ -35,3 +35,10 @@ Use four separate physical phones/computers, ideally across both Wi-Fi and cellu
 9. Test a two-player crew with separate station tabs, narrow phone layouts, readable equipment tags, touch controls and permanent credits.
 
 Record device models, browsers, network types, public build identifier, observed defects and date. Final acceptance remains pending until the owner/physical testers complete this record. No physical-device results are claimed by the automated tests.
+
+## Room join fix verification — 2026-10-09 UTC
+
+All 17 automated tests pass. GitHub CI passed for 471368b7afa3. Public independent-client join regression passed (CF-71726B): distinct credentials/identities, same process, shared authority, synchronized roster and READY updates. Real public application redeploy preserved room CF-274EDC and its host session; a fresh independent guest joined the replacement instance. Two fresh browser sessions joined CF-97822F with lowercase, whitespace and a Unicode dash; READY synchronized, and guest reload retained identity without a duplicate seat. Server logs confirmed found=true and committed membership counts 1 then 2 on the same instance. Hosted four-client privacy, FT-201A false-low/healthy cooling, player-created cooling loss, communication sequence and reconnect tests passed. Physical two-device confirmation remains pending. No gameplay polish was added.
+
+For restart verification: run `node scripts/room-restart-regression.mjs https://critical-failure.onrender.com`, wait for READY, then redeploy the application without replacing its Key Value store. The script verifies the replacement process restores the original host identity and room and accepts a new independent guest.
+
