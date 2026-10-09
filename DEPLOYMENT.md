@@ -33,4 +33,5 @@ Opaque bearer session credentials, per-station projections, server-side action v
 
 ## Publishing status
 
-No hosting account, repository remote, authenticated GitHub CLI, Render CLI or public service is connected in the workspace. The deployment files are prepared; a public URL has not been created. The owner must provide authenticated account/repository access before publishing can proceed.
+The source is published at https://github.com/AlexanderTh3Greatest/Critical-Failure on `main`. GitHub and Render integrations are connected. Render lists the workspace “The Shop”; explicit owner confirmation of that workspace is pending before service creation. A public game URL has not been created. The local folder is not a Git checkout; source publication currently uses the connected GitHub API.
+
